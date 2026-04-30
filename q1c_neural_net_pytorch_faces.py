@@ -41,9 +41,9 @@ class PyTorchNeuralNetworkFaces(nn.Module):
                  output_size: int = 2):
         """Construct `nn.Linear` and activation modules for each layer."""
         super().__init__()
-        self.fc1 == nn.Linear(input_size, hidden1_size)
-        self.fc2 == nn.Linear(hidden1_size, hidden2_size)
-        self.fc3 == nn.Linear(hidden2_size, output_size)
+        self.fc1 = nn.Linear(input_size, hidden1_size)
+        self.fc2 = nn.Linear(hidden1_size, hidden2_size)
+        self.fc3 = nn.Linear(hidden2_size, output_size)
         self.act = nn.ReLU()
 
     def forward(self, x: "torch.Tensor") -> "torch.Tensor":
@@ -91,7 +91,7 @@ class PyTorchFacesClassifier:
         """Predict 0 or 1 for a single 70x60 image."""
         self.model.eval()
         with torch.no_grad():
-            x = torch.tensor(flatten_images(image[np.newaxis,:,:]), dtype=torch.float32).unsqueeze(0).to(self.device)
+            x = torch.tensor(flatten_images(image[np.newaxis,:,:]), dtype=torch.float32).to(self.device)
         return int (self.model(x).argmax(dim=1).item())
 
     def evaluate(self, images: np.ndarray, labels: np.ndarray) -> float:

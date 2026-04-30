@@ -66,7 +66,8 @@ class PerceptronFacesClassifier:
 
     def evaluate(self, images: np.ndarray, labels: np.ndarray) -> float:
         """Return classification accuracy in [0, 1] over a batch."""
-        correct = sum(self.predict(img) == lbl for img, lbl in zip (images, labels))
+        correct = sum(self.predict(img) == lbl for img, lbl in zip(images, labels))
+        return correct / len(labels)
 
 
 def main(training_percent: int, num_iterations: int = 5) -> dict:

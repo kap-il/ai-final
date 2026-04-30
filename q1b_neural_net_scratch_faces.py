@@ -47,7 +47,7 @@ class ScratchNeuralNetworkFaces:
         """Initialise network hyperparameters and weight matrices."""
         if seed is not None: 
             np.random.seed(seed)
-        self.lr = nearning_rate
+        self.lr = learning_rate
         self.num_epochs = num_epochs
         self.batch_size = batch_size
 
@@ -65,10 +65,10 @@ class ScratchNeuralNetworkFaces:
         z1 = X @ self.W1 + self.b1
         a1 = np.maximum(0,z1)
 
-        z2 = X @ self.W2 + self.b2
+        z2 = a1 @ self.W2 + self.b2
         a2 = np.maximum(0,z2)
 
-        z3 = X @ self.W3 + self.b3
+        z3 = a2 @ self.W3 + self.b3
         z3 -= z3.max(axis=1, keepdims=True)
         exp_z3 = np.exp(z3)
         y_hat = exp_z3 / exp_z3.sum(axis=1, keepdims=True)
@@ -100,8 +100,7 @@ class ScratchNeuralNetworkFaces:
         dW1 = X.T @ dz1
         db1 = dz1.sum(axis=0)
 
-        return {"dW1": dW1, "db1": db1, "dW2": dW2, "db2": db2, 
-        "dW2": dW2, "db2": db2, "dW3": dW3, "db3": db3}
+        return {"dW1": dW1, "db1": db1, "dW2": dW2, "db2": db2, "dW3": dW3, "db3": db3}
 
 
         
@@ -130,7 +129,8 @@ class ScratchNeuralNetworkFaces:
             perm = np.random.permutation(N)
             for start in range(0, N, self.batch_size):
                 idx = perm[start:start + self.batch_size]
-                self.forward(x[idx], Y[idx])
+                self.forward(X[idx])
+                grads = self.backward(X[idx], Y[idx])
                 self.update_weights(grads)
 
 
