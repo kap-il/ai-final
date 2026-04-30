@@ -45,39 +45,107 @@ class ScratchNeuralNetworkFaces:
         seed: int | None = None,
     ):
         """Initialise network hyperparameters and weight matrices."""
-        # TODO: initialize weights, biases, and hyperparameters.
-        raise NotImplementedError
+        if seed is not None: 
+            np.random.seed(seed)
+        self.lr = nearning_rate
+        self.num_epochs = num_epochs
+        self.batch_size = batch_size
+
+        self.W1 = np.random.randn(input_size, hidden1_size)*np.sqrt(2 / input_size)
+        self.b1 = np.zeros(hidden1_size)
+        self.W2 = np.random.randn(hidden1_size, hidden2_size)*np.sqrt(2 / hidden1_size)
+        self.b2 = np.zeros(hidden2_size)
+        self.W3 = np.random.randn(hidden2_size, output_size)*np.sqrt(2 / hidden2_size)
+        self.b3 = np.zeros(output_size)
+        self.cache = {}
+
 
     def forward(self, X: np.ndarray) -> np.ndarray:
         """Forward pass. See `ScratchNeuralNetworkDigits.forward`."""
-        # TODO: 3 linear layers with hidden activations; final softmax
-        # (or sigmoid if output_size == 1). Cache intermediates.
-        raise NotImplementedError
+        z1 = X @ self.W1 + self.b1
+        a1 = np.maximum(0,z1)
+
+        z2 = X @ self.W2 + self.b2
+        a2 = np.maximum(0,z2)
+
+        z3 = X @ self.W3 + self.b3
+        z3 -= z3.max(axis=1, keepdims=True)
+        exp_z3 = np.exp(z3)
+        y_hat = exp_z3 / exp_z3.sum(axis=1, keepdims=True)
+
+        self.cache = { "X": X, "z1": z1, "a1": a1, "z2": z2, "a2": a2, "y_hat": y_hat}
+        return y_hat
+
+
 
     def backward(self, X: np.ndarray, y_onehot: np.ndarray) -> dict:
         """Back propagate loss gradients through the network."""
-        # TODO: compute dW1, db1, dW2, db2, dW3, db3 via the chain rule.
-        raise NotImplementedError
+        N = X.shape[0]
+        a1, a2, z1, z2, y_hat = (self.cache[k] for k in ("a1", "a2", "z1", "z2", "y_hat"))
+
+        dz3 = (y_hat - y_onehot) / N
+
+        dW3 = a2.T @ dz3
+        db3 = dz3.sum(axis=0)
+
+        da2 = dz3 @ self.W3.T
+        dz2 = da2*(z2 > 0)
+
+        dW2 = a1.T @ dz2
+        db2 = dz2.sum(axis=0)
+
+        da1 = dz2 @ self.W2.T
+        dz1 = da1*(z1 > 0)
+
+        dW1 = X.T @ dz1
+        db1 = dz1.sum(axis=0)
+
+        return {"dW1": dW1, "db1": db1, "dW2": dW2, "db2": db2, 
+        "dW2": dW2, "db2": db2, "dW3": dW3, "db3": db3}
+
+
+        
 
     def update_weights(self, grads: dict) -> None:
         """Apply one gradient descent step using `grads` from `backward`."""
-        # TODO: SGD update with self.learning_rate.
-        raise NotImplementedError
+        self.W1 -= self.lr * grads["dW1"]
+        self.b1 -= self.lr * grads["db1"]
+        self.W2 -= self.lr * grads["dW2"]
+        self.b2 -= self.lr * grads["db2"]
+        self.W3 -= self.lr * grads["dW3"]
+        self.b3 -= self.lr * grads["db3"]
+
+
 
     def train(self, training_images: np.ndarray, training_labels: np.ndarray) -> None:
         """Full training loop: epochs and mini batches."""
-        # TODO: flatten, one hot encode labels, epoch and mini batch loop.
-        raise NotImplementedError
+        X = flatten_images(training_images)
+
+        Y = np.zeros((len(training_labels), 2))
+        Y[np.arange(len(training_labels)), training_labels] = 1.0
+
+
+        N = X.shape[0]
+        for _ in range(self.num_epochs):
+            perm = np.random.permutation(N)
+            for start in range(0, N, self.batch_size):
+                idx = perm[start:start + self.batch_size]
+                self.forward(x[idx], Y[idx])
+                self.update_weights(grads)
+
 
     def predict(self, image: np.ndarray) -> int:
         """Predict 0 or 1 for a single 70x60 image."""
-        # TODO: flatten, run forward, argmax (or threshold).
-        raise NotImplementedError
+        x = image.flatten().reshape(1, -1)
+        y_hat = self.forward(x)
+        return int(np.argmax(y_hat, axis=1)[0])
 
     def evaluate(self, images: np.ndarray, labels: np.ndarray) -> float:
         """Return classification accuracy on a batch of images."""
-        # TODO: vectorised forward pass, argmax, compare.
-        raise NotImplementedError
+        X = flatten_images(images)
+        y_hat = self.forward(X)
+        preds = np.argmax(y_hat, axis = 1)
+        return float(np.mean(preds == labels))
 
 
 def main(training_percent: int, num_iterations: int = 5) -> dict:
