@@ -59,7 +59,7 @@ class PyTorchFacesClassifier:
         hidden1_size: int = 128,
         hidden2_size: int = 64,
         learning_rate: float = 1e-3,
-        num_epochs: int = 20,
+        num_epochs: int = 100,
         batch_size: int = 32,
         device: str | None = None,
     ):

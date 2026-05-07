@@ -40,7 +40,7 @@ class ScratchNeuralNetworkFaces:
         hidden2_size: int = 64,
         output_size: int = 2,
         learning_rate: float = 0.01,
-        num_epochs: int = 20,
+        num_epochs: int = 100,
         batch_size: int = 32,
         seed: int | None = None,
     ):

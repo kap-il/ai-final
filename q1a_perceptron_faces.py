@@ -33,7 +33,7 @@ class PerceptronFacesClassifier:
         corrected the prediction.
     """
 
-    def __init__(self, image_shape=(70, 60), max_iterations: int = 3):
+    def __init__(self, image_shape=(70, 60), max_iterations: int = 100):
         """Initialise weights and bias.
 
         `image_shape` is (rows, cols) for each input image.
